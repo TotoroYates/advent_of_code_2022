@@ -12,13 +12,6 @@ File.readlines('input.txt').each{|line|
 }
 
 def isVisibleFromSide(rowPosition, columnPosition, forestArray)
-    # return two items beside
-    puts "========="
-    puts "checking if this coordinate is vsisble from side: \n"
-    puts "row is " + rowPosition.to_s
-    puts "column is " + columnPosition.to_s
-
-    #leftSide = forestArray[columnPosition][rowPosition - 1]
     leftSideSlice = forestArray[rowPosition].slice(0, columnPosition) 
     rightSideSlice = forestArray[rowPosition].slice(columnPosition +1, 100)
 
@@ -41,20 +34,6 @@ def isVisibleFromSide(rowPosition, columnPosition, forestArray)
     lowerHighest = lowerSlice.max
 
     treeBeingChecked = forestArray[rowPosition][columnPosition]
-    puts "tree being checked is: " + treeBeingChecked.to_s
-    # puts "all items to left is "
-    # puts leftSideSlice
-    # puts "highest element in left is " + leftSideHighest.to_s
-    # puts "all items to right is "
-    # puts rightSideSlice
-    # puts "highest element in right is " + rightSideHighest.to_s
-    # puts "verticalArray is "
-    # puts verticalArray
-    # puts "===="
-    puts "all items to above is "
-    puts upperSlice
-    puts "all items to below is "
-    puts lowerSlice
 
     if treeBeingChecked > leftSideHighest || treeBeingChecked > rightSideHighest 
         puts "row " + rowPosition.to_s + " colomn " + columnPosition.to_s + " is visble from the sides"
@@ -81,18 +60,89 @@ def isVisible(rowPosition, columnPosition, forestArray)
 
 end
 
+def getLeftScore(treeBeingChecked, leftSideSlice)
+    leftSideScore = 0
+    if leftSideSlice.length > 0
+        leftSideSlice = leftSideSlice.reverse()
+        leftSideSlice.each{|treeToCompare|
+            leftSideScore += 1
+            if treeToCompare >= treeBeingChecked
+                return leftSideScore
+            end
+        }
+    end
+    return leftSideScore
+end
+
+def getRightScore(treeBeingChecked, rightSideSlice)
+    rightSideScore = 0
+    if rightSideSlice.length > 0
+        rightSideSlice.each{|treeToCompare|
+            rightSideScore += 1
+            if treeToCompare >= treeBeingChecked
+                return rightSideScore
+            end
+        }
+    end
+    return rightSideScore
+end
+
+def calculateScenicScore(rowPosition, columnPosition, forestArray)
+    leftSideSlice = forestArray[rowPosition].slice(0, columnPosition) 
+    rightSideSlice = forestArray[rowPosition].slice(columnPosition +1, 100)
+
+    columnLength = forestArray[0].length
+    columnCounter = 0
+    verticalArray = []
+    while columnCounter < forestArray.length
+
+        verticalArray.append(forestArray[columnCounter][columnPosition])
+        columnCounter += 1
+    end
+
+    upperSlice = verticalArray.slice(0, rowPosition)
+    lowerSlice = verticalArray.slice(rowPosition + 1, 100)
+
+    treeBeingChecked = forestArray[rowPosition][columnPosition]
+
+    leftSideScore = getLeftScore(treeBeingChecked, leftSideSlice)
+    rightSideScore = getRightScore(treeBeingChecked, rightSideSlice)
+    upperScore = getLeftScore(treeBeingChecked, upperSlice)
+    lowerScore = getRightScore(treeBeingChecked, lowerSlice)
+
+    scenicScore = (leftSideScore * rightSideScore * upperScore * lowerScore)
+    return scenicScore
+end
+
+ ## PART 1 
+# row = 0
+# forestArray.each{|forestRow|
+#     column =0
+#     forestRow.each{|tree|
+        
+#         isVisible = isVisible(row, column, forestArray)
+#         if isVisible == true
+#             totalVisible += 1
+#         end
+#         column += 1
+#     }
+#     row +=1 
+# }
+
+# puts totalVisible
+
+## PART 2
+scenicScores = []
 row = 0
 forestArray.each{|forestRow|
     column =0
     forestRow.each{|tree|
         
-        isVisible = isVisible(row, column, forestArray)
-        if isVisible == true
-            totalVisible += 1
-        end
+        scenicScore = calculateScenicScore(row, column, forestArray)
+        scenicScores.append(scenicScore)
         column += 1
     }
     row +=1 
 }
 
-puts totalVisible
+puts scenicScores.max
